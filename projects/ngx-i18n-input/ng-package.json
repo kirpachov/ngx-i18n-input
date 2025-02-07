@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../../quotations/angular-quotations/dist-libs/ngx-i18n-input",
+  "dest": "../../../demo/demo-develop/dist-libs/ngx-i18n-input",
   "lib": {
     "entryFile": "src/public-api.ts"
   }

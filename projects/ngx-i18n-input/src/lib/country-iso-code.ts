@@ -246,4 +246,30 @@ export const COUNTRY_ISO_CODES = [
   'ZW'
 ] as const;
 
+/**
+ * TODO: how localize country names?
+ */
+export const LANGUAGE_DETAILS: Record<string, { i18nName: string } > = {
+  en: { i18nName: "English"      },
+  zh: { i18nName: "Chinese"      },
+  es: { i18nName: "Spanish"      },
+  ar: { i18nName: "Arabic"       },
+  hi: { i18nName: "Hindi"        },
+  bn: { i18nName: "Bengali"      },
+  pt: { i18nName: "Portuguese"   },
+  ru: { i18nName: "Russian"      },
+  ja: { i18nName: "Japanese"     },
+  de: { i18nName: "German"       },
+  fr: { i18nName: "French"       },
+  it: { i18nName: "Italian"      },
+  tr: { i18nName: "Turkish"      },
+  ko: { i18nName: "Korean"       },
+  vi: { i18nName: "Vietnamese"   },
+  ur: { i18nName: "Urdu"         },
+  fa: { i18nName: "Persian"      },
+  pl: { i18nName: "Polish"       },
+  nl: { i18nName: "Dutch"        },
+  th: { i18nName: "Thai"         },
+};
+
 export type CountryIsoCode = typeof COUNTRY_ISO_CODES[number];

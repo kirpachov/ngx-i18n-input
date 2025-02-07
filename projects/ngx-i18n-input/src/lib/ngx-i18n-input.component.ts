@@ -1,18 +1,14 @@
-import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Lang } from './types';
 import { ngxI18nDefaultFormatOutput } from './functions';
 import { map, Observable } from 'rxjs';
+import { NgxI18nInputService } from './ngx-i18n-input.service';
 
 @Component({
   selector: 'ngx-i18n-input',
-  template: `
-    <p>
-      ngx-i18n-input works!
-    </p>
-  `,
-  styles: [
-  ],
+  templateUrl: './ngx-i18n-input.component.html',
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -22,54 +18,74 @@ import { map, Observable } from 'rxjs';
     }
   ]
 })
-export class NgxI18nInputComponent implements OnInit, ControlValueAccessor {
+export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
+
+  private readonly service: NgxI18nInputService = inject(NgxI18nInputService);
+  // readonly configs$ = this.service.configs$;
+
+  configs = this.service.configs$.value;
 
   readonly forms: FormGroup = new FormGroup({});
 
-  @Input() formatOutput: (value: Record<Lang, string | number | null>) => Record<Lang, string | null> = ngxI18nDefaultFormatOutput;
+  @Input() formatOutput: (value: Record<Lang, T | null>) => Record<Lang, T | null> = ngxI18nDefaultFormatOutput;
 
-  @Output() valueChanges: Observable<Record<Lang, string | null>> = this.forms.valueChanges.pipe(map(this.formatOutput));
+  @Output() valueChanges: Observable<Record<Lang, T | null>> = this.forms.valueChanges.pipe(map(this.formatOutput));
 
   /**
    * TODO when touched, emit an event
    */
   @Output() touchedChanges: Observable<void> = new Observable<void>();
 
+  /**
+   * Customize input template. Suggested but not required.
+   * Usage:
+   * ```html
+   *  <ng-template #titleTemplate let-all>
+   *   <input [formControl]="all.control">
+   *  </ng-template>
+   *
+   *  <ngx-i18n-input [inputTemplate]="titleTemplate" formControlName="title">
+   * ```
+   */
+  @Input() inputTemplate: TemplateRef<unknown> | null = null;
+
+  /**
+   * Customize language name template.
+   * Example with both input and label templates:
+   */
+  @Input() labelTemplate: TemplateRef<unknown> | null = null;
+
+  readonly availableLangs$ = this.service.availableLangs$;
+
   ngOnInit(): void {
-    console.log("init");
+    this.availableLangs$.subscribe({next: (langs: Lang[]) => {
+      langs.forEach((lang: Lang) => {
+        this.forms.addControl(lang, new FormControl(null));
+      });
+    }});
+
+    this.service.configs$.subscribe({next: (configs) => this.configs = configs});
   }
 
   writeValue(value: unknown): void {
     if (value === null || value === undefined) value = {};
 
     if (typeof value !== 'object') {
-      console.error('NgxI18nInputComponent: value must be an object or null, got ', value);
-      return;
+      console.warn('NgxI18nInputComponent: value must be an object or null. Will reset input. got ', value);
+      value = {};
     }
 
-    const obj: Record<string | number, unknown> = value as Record<string | number, unknown>;
-
-    Object.keys(obj).forEach((lang: string) => {
-      const value: unknown = obj[lang];
-      if (typeof value === 'string' || value === null || value === undefined || typeof value === "number") {
-        if (this.forms.controls[lang]) this.forms.controls[lang].setValue(value);
-        else this.forms.addControl(lang, new FormControl(value)); // ??
-      } else {
-        console.error(`NgxI18nInputComponent: value for language ${lang} must be a string or null, got `, value);
-      }
-    });
+    this.forms.patchValue(value as Record<string, unknown>, { emitEvent: false });
   }
 
   registerOnChange(fn: any): void {
     this.valueChanges.subscribe({
-      next: (value: Record<Lang, string | null>) => fn(value)
+      next: (value: Record<Lang, T | null>) => fn(value)
     });
   }
 
   registerOnTouched(fn: any): void {
-    this.touchedChanges.subscribe({
-      next: () => fn()
-    });
+    this.registerOnChange(fn);
   }
 
   setDisabledState(isDisabled: boolean): void {

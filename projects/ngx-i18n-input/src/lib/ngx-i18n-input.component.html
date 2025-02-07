@@ -1,0 +1,25 @@
+<form [formGroup]="forms">
+  <ng-template #defaultInputTemplate let-all>
+    <input [formControl]="all.control">
+  </ng-template>
+
+  <ng-template #defaultlabelTemplate let-all>
+    <span>{{all.stringify(all.language)}}</span>
+  </ng-template>
+
+  <ng-container *ngFor="let lang of (availableLangs$ | async)">
+    <ng-container *ngTemplateOutlet="labelTemplate || defaultlabelTemplate; context: {
+      $implicit: {
+        language: lang,
+        stringify: configs.stringifyLang,
+      }
+      }"></ng-container>
+
+    <ng-container *ngTemplateOutlet="inputTemplate || defaultInputTemplate; context: {
+      $implicit: {
+        language: lang,
+        control: forms.controls[lang]
+      }
+      }"></ng-container>
+  </ng-container>
+</form>
