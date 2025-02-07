@@ -1,6 +1,6 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { NgxI18nInputComponent } from './ngx-i18n-input.component';
-import { AsyncPipe, JsonPipe, NgForOf, NgIf, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, JsonPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgTemplateOutlet } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConfig } from './types';
 
@@ -16,6 +16,9 @@ import { NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConf
     ReactiveFormsModule,
     NgForOf,
     AsyncPipe,
+    NgSwitch,
+    NgSwitchDefault,
+    NgSwitchCase,
 
     // DEVELOPMENT
     JsonPipe
@@ -26,7 +29,6 @@ import { NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConf
 })
 export class NgxI18nInputModule {
   static forRoot(configs: Partial<NgxI18nInputConfig>): ModuleWithProviders<NgxI18nInputModule> {
-    console.log(`forRoot`, { self: this, configs });
     return {
       ngModule: NgxI18nInputModule,
       providers: [

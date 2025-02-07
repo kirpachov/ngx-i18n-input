@@ -1,25 +1,57 @@
-<form [formGroup]="forms">
-  <ng-template #defaultInputTemplate let-all>
-    <input [formControl]="all.control">
-  </ng-template>
+<!-------------------  TEMPLATES ------------------->
+<ng-template #defaultInputTemplate let-all>
+  <input class="default-input-field" [formControl]="all.control">
+</ng-template>
 
-  <ng-template #defaultlabelTemplate let-all>
-    <span>{{all.stringify(all.language)}}</span>
-  </ng-template>
+<ng-template #defaultlabelTemplate let-all>
+  <span>{{all.stringify(all.language)}}</span>
+</ng-template>
 
+<ng-template #actualLabel let-all>
+  <ng-container *ngTemplateOutlet="labelTemplate || defaultlabelTemplate; context: {
+    $implicit: {
+      language: all.lang,
+      stringify: configs.stringifyLang,
+    }
+    }"></ng-container>
+</ng-template>
+
+<ng-template #actualInput let-all>
+  <ng-container *ngTemplateOutlet="inputTemplate || defaultInputTemplate; context: {
+    $implicit: {
+      language: all.lang,
+      control: forms.controls[all.lang]
+    }
+    }"></ng-container>
+</ng-template>
+
+<!-------------------  LAYOUTS ------------------->
+
+<ng-template #layoutVertical>
   <ng-container *ngFor="let lang of (availableLangs$ | async)">
-    <ng-container *ngTemplateOutlet="labelTemplate || defaultlabelTemplate; context: {
-      $implicit: {
-        language: lang,
-        stringify: configs.stringifyLang,
-      }
-      }"></ng-container>
+    <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang } }" ></ng-container>
 
-    <ng-container *ngTemplateOutlet="inputTemplate || defaultInputTemplate; context: {
-      $implicit: {
-        language: lang,
-        control: forms.controls[lang]
-      }
-      }"></ng-container>
+    <ng-container *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang } }" ></ng-container>
+  </ng-container>
+</ng-template>
+
+<ng-template #layoutTabs>
+  <ng-container *ngFor="let lang of (availableLangs$ | async)">
+    <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang } }" ></ng-container>
+
+    <ng-container *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang } }" ></ng-container>
+  </ng-container>
+</ng-template>
+
+<!-------------------  CONTENT ------------------->
+<form [formGroup]="forms">
+  <ng-container [ngSwitch]="layout">
+    <ng-container *ngSwitchCase="'tabs'">
+      <ng-container *ngTemplateOutlet="layoutTabs"></ng-container>
+    </ng-container>
+
+    <ng-container *ngSwitchDefault>
+      <ng-container *ngTemplateOutlet="layoutVertical"></ng-container>
+    </ng-container>
   </ng-container>
 </form>

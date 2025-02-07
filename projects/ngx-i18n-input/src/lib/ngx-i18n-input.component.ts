@@ -8,7 +8,7 @@ import { NgxI18nInputService } from './ngx-i18n-input.service';
 @Component({
   selector: 'ngx-i18n-input',
   templateUrl: './ngx-i18n-input.component.html',
-  styles: [],
+  styleUrls: ['./ngx-i18n-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -21,7 +21,6 @@ import { NgxI18nInputService } from './ngx-i18n-input.service';
 export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
 
   private readonly service: NgxI18nInputService = inject(NgxI18nInputService);
-  // readonly configs$ = this.service.configs$;
 
   configs = this.service.configs$.value;
 
@@ -54,6 +53,8 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
    * Example with both input and label templates:
    */
   @Input() labelTemplate: TemplateRef<unknown> | null = null;
+
+  @Input() layout: "tabs" | "vertical" = "vertical";
 
   readonly availableLangs$ = this.service.availableLangs$;
 
@@ -89,7 +90,6 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    console.log("disabledState");
     this.forms[isDisabled ? 'disable' : 'enable']();
   }
 

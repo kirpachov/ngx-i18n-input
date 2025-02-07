@@ -12,7 +12,6 @@ export interface NgxI18nInputConfig {
 export const NGX_I18N_INPUT_DEFAULT_CONFIGS: NgxI18nInputConfig = {
   availableLangs: ["en"],
   stringifyLang: (lang: string) => {
-    console.debug("default stringifyLang", {lang});
     return LANGUAGE_DETAILS[lang]?.i18nName || lang
   }
 };
