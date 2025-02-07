@@ -29,9 +29,13 @@
 
 <ng-template #layoutVertical>
   <ng-container *ngFor="let lang of (availableLangs$ | async)">
-    <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang } }" ></ng-container>
+    <div class="block mb-3">
+      <div class="flex flex-col">
+        <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang } }" ></ng-container>
 
-    <ng-container *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang } }" ></ng-container>
+        <ng-container *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang } }" ></ng-container>
+      </div>
+    </div>
   </ng-container>
 </ng-template>
 

@@ -8,7 +8,10 @@ import { NgxI18nInputService } from './ngx-i18n-input.service';
 @Component({
   selector: 'ngx-i18n-input',
   templateUrl: './ngx-i18n-input.component.html',
-  styleUrls: ['./ngx-i18n-input.component.scss'],
+  styleUrls: [
+    './ngx-i18n-input.component.scss',
+    './tw.scss'
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
