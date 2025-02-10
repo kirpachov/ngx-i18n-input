@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inje
 import { ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Lang } from './types';
 import { generateUid, ngxI18nDefaultFormatOutput } from './functions';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, of } from 'rxjs';
 import { NgxI18nInputService } from './ngx-i18n-input.service';
 
 @Component({
@@ -41,7 +41,7 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
   /**
    * TODO when touched, emit an event
    */
-  @Output() touchedChanges: Observable<void> = new Observable<void>();
+  // @Output() touchedChanges: Observable<void> = new Observable<void>();
 
   /**
    * Customize input template. Suggested but not required.
@@ -62,6 +62,13 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
    */
   @Input() labelTemplate: TemplateRef<unknown> | null = null;
 
+  /**
+   * Customize layout of the component.
+   * Available layouts:
+   * - tabs
+   * - vertical
+   * Default: vertical
+   */
   @Input() layout: "tabs" | "vertical" = "vertical";
 
   /**
@@ -76,16 +83,20 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
    */
   @Input() hideLabels: boolean = false;
 
-  readonly availableLangs$ = this.service.availableLangs$;
+  availableLangs$ = this.service.availableLangs$;
+
+  @Input() set languages(langs: Lang[]) {
+    this.availableLangs$ = new BehaviorSubject(langs);
+  }
 
   ngOnInit(): void {
     this.availableLangs$.subscribe({next: (langs: Lang[]) => {
       langs.forEach((lang: Lang) => {
-        this.forms.addControl(lang, new FormControl(null));
+        if (!this.forms.get(lang)) this.forms.addControl(lang, new FormControl(null));
       });
     }});
 
-    this.service.configs$.subscribe({next: (configs) => this.configs = configs});
+    this.service.configs$.subscribe({next: (c) => this.configs = c});
 
     if (typeof this.autofocus === "string" && this.forms.get(this.autofocus)) {
       this.activeLang = this.autofocus;
@@ -145,15 +156,12 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
     const done = () => this.cd.detectChanges();
 
     const input = document.getElementById(this.inputId(lang));
-    // console.log('tryLocateAndFocusInput', { input });
     if (input) {
       input.focus();
       return done();
     }
 
-    // const otherInput = document.querySelector(`#${this.getId(lang)} input`);
     const container = document.getElementById(this.containerId(lang));
-    // console.log('tryLocateAndFocusInput', { container });
     if (container) {
       const input = container.querySelector('input');
       if (input) {
