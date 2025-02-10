@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Lang } from './types';
 import { generateUid, ngxI18nDefaultFormatOutput } from './functions';
@@ -25,6 +25,7 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
 
   activeLang: Lang | null = null;
 
+  private readonly cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private readonly service: NgxI18nInputService = inject(NgxI18nInputService);
 
   @Input() uid: string = generateUid();
@@ -70,6 +71,11 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
    */
   @Input() autofocus: boolean | string = false;
 
+  /**
+   * When true, labels won't be displayed.
+   */
+  @Input() hideLabels: boolean = false;
+
   readonly availableLangs$ = this.service.availableLangs$;
 
   ngOnInit(): void {
@@ -84,8 +90,7 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
     if (typeof this.autofocus === "string" && this.forms.get(this.autofocus)) {
       this.activeLang = this.autofocus;
     } else if (this.autofocus === true) {
-      this.activeLang = this.availableLangs$.value[0];
-      setTimeout(() => this.activeLang && this.tryLocateAndFocusInput(this.activeLang));
+      this.focusInput(this.availableLangs$.value[0]);
     }
   }
 
@@ -126,16 +131,24 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
     return `container-${this.getId(lang)}`;
   }
 
+  focusInput(lang: string): void {
+    this.activeLang = lang;
+    setTimeout(() => this.tryLocateAndFocusInput(lang));
+    this.cd.detectChanges();
+  }
+
 
   /**
    * This method will try to locate the input with the given lang and focus it.
    */
   private tryLocateAndFocusInput(lang: Lang): void {
+    const done = () => this.cd.detectChanges();
+
     const input = document.getElementById(this.inputId(lang));
     // console.log('tryLocateAndFocusInput', { input });
     if (input) {
       input.focus();
-      return;
+      return done();
     }
 
     // const otherInput = document.querySelector(`#${this.getId(lang)} input`);
@@ -145,8 +158,10 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
       const input = container.querySelector('input');
       if (input) {
         input.focus();
-        return;
+        return done();
       }
     }
+
+    done();
   }
 }

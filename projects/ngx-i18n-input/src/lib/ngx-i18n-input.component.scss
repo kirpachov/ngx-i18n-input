@@ -6,7 +6,7 @@
     box-sizing: border-box;
   }
 
-  .layout-tabs {
+  .layout-tabs:not(.labels-hidden) {
     input.default-input-field {
       margin-top: -1px;
       border-top-left-radius: 0;
