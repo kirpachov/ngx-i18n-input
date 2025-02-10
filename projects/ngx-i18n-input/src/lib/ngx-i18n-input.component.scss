@@ -1,38 +1,16 @@
 // @import 'tw.scss';
 
 :host {
-  --input-border-color: #ccc;
-  --input-focus-color: #007bff;
-  --input-background: #f9f9f9;
-  --input-text-color: #333;
-  --input-radius: 6px;
-  --input-padding: 10px;
-  --input-transition-time: 0.3s;
 
-  .default-input-field {
-    padding: var(--input-padding);
-    font-size: 16px;
-    border: 1px solid var(--input-border-color);
-    border-radius: var(--input-radius);
-    background-color: var(--input-background);
-    color: var(--input-text-color);
-    outline: none;
-    transition: border-color var(--input-transition-time) ease, 
-                box-shadow var(--input-transition-time) ease;
-  
-    &:hover {
-      border-color: color-mix(in srgb, var(--input-border-color) 90%, black 10%);
-    }
-  
-    &:focus {
-      border-color: var(--input-focus-color);
-      box-shadow: 0 0 5px rgba(var(--input-focus-color), 0.5);
-    }
-  
-    &:disabled {
-      background: color-mix(in srgb, var(--input-background) 95%, black 5%);
-      cursor: not-allowed;
-      color: color-mix(in srgb, var(--input-text-color) 70%, white 30%);
+  &, * {
+    box-sizing: border-box;
+  }
+
+  .layout-tabs {
+    input.default-input-field {
+      margin-top: -1px;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
     }
   }
 }
