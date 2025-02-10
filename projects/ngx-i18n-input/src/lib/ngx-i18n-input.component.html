@@ -2,19 +2,26 @@
 <ng-template #defaultInputTemplate let-all>
   <!-- class="default-input-field" -->
   <input id="{{ all.id }}"
-    class="default-input-field outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-    [placeholder]="configs.stringifyLang(all.language)" [formControl]="all.control">
+    class="default-input-field outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-blue-500"
+    [ngClass]="{
+      'focus:ring-blue-500': all.control.valid,
+      'border-red-500': all.control.invalid &&  all.control.touched
+    }"
+    [placeholder]="configs.stringifyLang(all.language)"
+    [formControl]="all.control">
 </ng-template>
 
 <ng-template #defaultlabelTemplate let-all>
-  <span class="">{{all.stringify(all.language)}}</span>
+  <span [ngClass]="{'underline decoration-wavy decoration-red-500': all.control.touched && all.control.invalid && (layout === 'vertical' || !isActiveLang(all.language))}" >{{ all.stringify(all.language) }}</span>
 </ng-template>
 
 <ng-template #actualLabel let-all>
   <ng-container *ngTemplateOutlet="labelTemplate || defaultlabelTemplate; context: {
     $implicit: {
       language: all.lang,
+      control: forms.controls[all.lang],
       stringify: configs.stringifyLang,
+      id: all.id,
     }
     }"></ng-container>
 </ng-template>
@@ -24,6 +31,7 @@
     $implicit: {
       language: all.lang,
       control: forms.controls[all.lang],
+      stringify: configs.stringifyLang,
       id: all.id,
     }
     }"></ng-container>
@@ -51,13 +59,13 @@
 <ng-template #layoutTabs>
 
   <ul *ngIf="!hideLabels"
-    class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
-    <ng-container *ngFor="let lang of (availableLangs$ | async); let index = index">
+    class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200">
+    <ng-container *ngFor="let lang of (availableLangs$ | async);">
       <li class="me-2">
         <label for="input-{{uid}}-{{lang}}" (click)="focusInput(lang)"
           class="inline-block px-4 py-3 rounded-t-lg cursor-pointer" [ngClass]="{
-            'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500': lang === activeLang || (activeLang === null && index == 0),
-            'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300': !(lang === activeLang || (activeLang === null && index == 0))
+            'text-blue-600 bg-gray-100 active': isActiveLang(lang),
+            'hover:text-gray-600 hover:bg-gray-50': !isActiveLang(lang)
             }">
           <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang } }"></ng-container>
         </label>
@@ -65,9 +73,9 @@
     </ng-container>
   </ul>
 
-  <ng-container *ngFor="let lang of (availableLangs$ | async); let index = index">
+  <ng-container *ngFor="let lang of (availableLangs$ | async);">
     <div id="{{ containerId(lang) }}" [ngClass]="{
-      'hidden': !(lang === activeLang || (activeLang === null && index == 0))
+      'hidden': !isActiveLang(lang)
     }">
       <ng-container
         *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang, id: inputId(lang) } }"></ng-container>

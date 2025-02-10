@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input, OnInit, Output, TemplateRef } from '@angular/core';
-import { ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR, RequiredValidator } from '@angular/forms';
 import { Lang } from './types';
 import { generateUid, ngxI18nDefaultFormatOutput } from './functions';
 import { BehaviorSubject, map, Observable, of } from 'rxjs';
@@ -21,7 +21,7 @@ import { NgxI18nInputService } from './ngx-i18n-input.service';
     }
   ]
 })
-export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
+export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValueAccessor {
 
   activeLang: Lang | null = null;
 
@@ -89,10 +89,35 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
     this.availableLangs$ = new BehaviorSubject(langs);
   }
 
+  /**
+   * When true, all inputs will be required.
+   */
+  @Input() required: boolean = false;
+
+  validateFn(control: AbstractControl): { [key: string]: any } | null {
+    const value: unknown = control.value;
+    const acc: Record<string, any> = {};
+
+    if (this.required) {
+      if (
+        value == null ||
+        value == undefined ||
+        ((typeof value === "string" || Array.isArray(value)) && value.length === 0) || 
+        (typeof value === "object" && Object.keys(value as Record<string, unknown>).length === 0)
+      ) {
+        acc["required"] = true ;
+      }
+    }
+
+    return Object.keys(acc).length > 0 ? acc : null;
+  }
+
   ngOnInit(): void {
     this.availableLangs$.subscribe({next: (langs: Lang[]) => {
       langs.forEach((lang: Lang) => {
-        if (!this.forms.get(lang)) this.forms.addControl(lang, new FormControl(null));
+        if (!this.forms.get(lang)) this.forms.addControl(lang, new FormControl(null, [
+          this.validateFn.bind(this)
+        ]));
       });
     }});
 
@@ -103,6 +128,12 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
     } else if (this.autofocus === true) {
       this.focusInput(this.availableLangs$.value[0]);
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    setTimeout(() => {
+      Object.values(this.forms.controls).forEach((control: AbstractControl) => control.updateValueAndValidity());
+    });
   }
 
   writeValue(value: unknown): void {
@@ -140,6 +171,14 @@ export class NgxI18nInputComponent<T> implements OnInit, ControlValueAccessor {
 
   containerId(lang: Lang): string {
     return `container-${this.getId(lang)}`;
+  }
+
+  isActiveLang(lang: Lang): boolean {
+    return this.activeLang === lang || (
+      this.activeLang === null &&
+      this.availableLangs$.value &&
+      lang === this.availableLangs$.value[0]
+    );
   }
 
   focusInput(lang: string): void {
