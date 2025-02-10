@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR, RequiredValidator } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR, RequiredValidator, ValidatorFn } from '@angular/forms';
 import { Lang } from './types';
 import { generateUid, ngxI18nDefaultFormatOutput } from './functions';
 import { BehaviorSubject, map, Observable, of } from 'rxjs';
@@ -92,13 +92,15 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   /**
    * When true, all inputs will be required.
    */
-  @Input() required: boolean = false;
+  @Input() required: boolean | null | undefined = false;
+
+  @Input() validators: ValidatorFn[] | null | undefined = [];
 
   validateFn(control: AbstractControl): { [key: string]: any } | null {
     const value: unknown = control.value;
     const acc: Record<string, any> = {};
 
-    if (this.required) {
+    if (this.required === true) {
       if (
         value == null ||
         value == undefined ||
@@ -108,6 +110,15 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
         acc["required"] = true ;
       }
     }
+
+    this.validators?.forEach((validator: ValidatorFn) => {
+      const result: Record<string, any> | null = validator(control);
+      if (result) {
+        Object.keys(result).forEach((key: string) => {
+          acc[key] = result[key];
+        });
+      }
+    });
 
     return Object.keys(acc).length > 0 ? acc : null;
   }
