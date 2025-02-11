@@ -249,27 +249,27 @@ export const COUNTRY_ISO_CODES = [
 /**
  * TODO: how localize country names?
  */
-export const LANGUAGE_DETAILS: Record<string, { i18nName: string }> = {
-  en: { i18nName: "English"      },
-  zh: { i18nName: "Chinese"      },
-  es: { i18nName: "Spanish"      },
-  ar: { i18nName: "Arabic"       },
-  hi: { i18nName: "Hindi"        },
-  bn: { i18nName: "Bengali"      },
-  pt: { i18nName: "Portuguese"   },
-  ru: { i18nName: "Russian"      },
-  ja: { i18nName: "Japanese"     },
-  de: { i18nName: "German"       },
-  fr: { i18nName: "French"       },
-  it: { i18nName: "Italian"      },
-  tr: { i18nName: "Turkish"      },
-  ko: { i18nName: "Korean"       },
-  vi: { i18nName: "Vietnamese"   },
-  ur: { i18nName: "Urdu"         },
-  fa: { i18nName: "Persian"      },
-  pl: { i18nName: "Polish"       },
-  nl: { i18nName: "Dutch"        },
-  th: { i18nName: "Thai"         },
+export const LANGUAGE_DETAILS: Record<string, { name: string }> = {
+  en: { name: "English"      },
+  zh: { name: "Chinese"      },
+  es: { name: "Spanish"      },
+  ar: { name: "Arabic"       },
+  hi: { name: "Hindi"        },
+  bn: { name: "Bengali"      },
+  pt: { name: "Portuguese"   },
+  ru: { name: "Russian"      },
+  ja: { name: "Japanese"     },
+  de: { name: "German"       },
+  fr: { name: "French"       },
+  it: { name: "Italian"      },
+  tr: { name: "Turkish"      },
+  ko: { name: "Korean"       },
+  vi: { name: "Vietnamese"   },
+  ur: { name: "Urdu"         },
+  fa: { name: "Persian"      },
+  pl: { name: "Polish"       },
+  nl: { name: "Dutch"        },
+  th: { name: "Thai"         },
 };
 
 export type CountryIsoCode = typeof COUNTRY_ISO_CODES[number];
