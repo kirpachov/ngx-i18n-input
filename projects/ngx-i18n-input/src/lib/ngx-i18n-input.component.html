@@ -1,19 +1,19 @@
 <!-------------------  TEMPLATES ------------------->
 <ng-template #defaultInputTemplate let-all>
   <input id="{{ all.id }}"
-    class="default-input-field border-solid outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+    class="default-input-field border-solid outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-blue-500"
     [ngClass]="{
-      'focus:ring-blue-500 focus:border-blue-500': all.control.valid,
+      'focus:ring-blue-500': all.control.valid,
       'border-red-500': all.control.invalid && all.control.touched
     }"
 
-    [placeholder]="all.configs.formatLabel(all.language, this.label)"
+    [placeholder]="all.configs.formatLabel(all.language, all.configs.label)"
     [formControl]="all.control">
 </ng-template>
 
 <ng-template #defaultlabelTemplate let-all>
   <span [ngClass]="{'underline decoration-wavy decoration-red-500': all.control.touched && all.control.invalid && (layout === 'vertical' || !isActiveLang(all.language))}">
-    {{ all.configs.formatLabel(all.language, this.label) }}
+    {{ all.configs.formatLabel(all.language, all.configs.label) }}
   </span>
 </ng-template>
 
@@ -61,7 +61,7 @@
 <ng-template #layoutTabs>
 
   <ul *ngIf="!hideLabels"
-    class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200">
+    class="m-0 p-0 flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200">
     <ng-container *ngFor="let lang of availableLangs;">
       <li class="me-2">
         <label for="input-{{uid}}-{{lang}}" (click)="focusInput(lang)"

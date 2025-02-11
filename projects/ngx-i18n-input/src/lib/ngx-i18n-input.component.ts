@@ -12,7 +12,6 @@ import { BehaviorSubject, map, Observable, of } from 'rxjs';
     './ngx-i18n-input.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -157,14 +156,6 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
     return this.configs.validators || [];
   }
 
-  private readonly elementRef: ElementRef = inject(ElementRef);
-
-  /**
-   * Since we're using shadow dom, we need to store a reference to it.
-   * Hence, if you need to find an element, don't use document.getElementById, but this.myShadowRoot.getElementById.
-   */
-  private readonly myShadowRoot: ShadowRoot = this.elementRef.nativeElement.shadowRoot;
-
   validateFn(control: AbstractControl): { [key: string]: any } | null {
     const value: unknown = control.value;
     const acc: Record<string, any> = {};
@@ -280,13 +271,13 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   private tryLocateAndFocusInput(lang: Lang): void {
     const done = () => this.cd.detectChanges();
 
-    const input = this.myShadowRoot.getElementById(this.inputId(lang));
+    const input = document.getElementById(this.inputId(lang));
     if (input) {
       input.focus();
       return done();
     }
 
-    const container = this.myShadowRoot.getElementById(this.containerId(lang));
+    const container = document.getElementById(this.containerId(lang));
     if (container) {
       const input = container.querySelector('input');
       if (input) {
