@@ -249,7 +249,7 @@ export const COUNTRY_ISO_CODES = [
 /**
  * TODO: how localize country names?
  */
-export const LANGUAGE_DETAILS: Record<string, { i18nName: string } > = {
+export const LANGUAGE_DETAILS: Record<string, { i18nName: string }> = {
   en: { i18nName: "English"      },
   zh: { i18nName: "Chinese"      },
   es: { i18nName: "Spanish"      },

@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, inject, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef, ViewEncapsulation } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR, RequiredValidator, ValidatorFn } from '@angular/forms';
-import { Lang } from './types';
-import { generateUid, ngxI18nDefaultFormatOutput } from './functions';
+import { Lang, mergeNgxI18nConfigs, NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConfig, NgxI18nInputLayout, NgxI18nInputLayouts } from './types';
+import { generateUid, ngxI18nDefaultFormatOutput } from './types';
 import { BehaviorSubject, map, Observable, of } from 'rxjs';
-import { NgxI18nInputService } from './ngx-i18n-input.service';
 
 @Component({
   selector: 'ngx-i18n-input',
@@ -13,6 +12,7 @@ import { NgxI18nInputService } from './ngx-i18n-input.service';
     './ngx-i18n-input.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.ShadowDom,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -26,11 +26,10 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   activeLang: Lang | null = null;
 
   private readonly cd: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private readonly service: NgxI18nInputService = inject(NgxI18nInputService);
 
   @Input() uid: string = generateUid();
 
-  configs = this.service.configs$.value;
+  readonly configs: NgxI18nInputConfig = mergeNgxI18nConfigs(inject(NGX_I18N_INPUT_CONFIG, {optional: true}) || NGX_I18N_INPUT_DEFAULT_CONFIGS);
 
   readonly forms: FormGroup = new FormGroup({});
 
@@ -54,13 +53,13 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    *  <ngx-i18n-input [inputTemplate]="titleTemplate" formControlName="title">
    * ```
    */
-  @Input() inputTemplate: TemplateRef<unknown> | null = null;
+  @Input() inputTemplate: TemplateRef<unknown> | null = this.configs.inputTemplate;
 
   /**
    * Customize language name template.
    * Example with both input and label templates:
    */
-  @Input() labelTemplate: TemplateRef<unknown> | null = null;
+  @Input() labelTemplate: TemplateRef<unknown> | null = this.configs.labelTemplate;
 
   /**
    * Customize layout of the component.
@@ -69,32 +68,40 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    * - vertical
    * Default: vertical
    */
-  @Input() layout: "tabs" | "vertical" = "vertical";
+  @Input() layout: NgxI18nInputLayout = this.configs.layout;
 
   /**
    * Autofocus input.
    * When boolean, will autofocus the first input.
    * When string, will autofocus the input with the given lang.
    */
-  @Input() autofocus: boolean | string = false;
+  @Input() autofocus: boolean | string = this.configs.autofocus;
 
   /**
    * When true, labels won't be displayed.
    */
-  @Input() hideLabels: boolean = false;
+  @Input() hideLabels: boolean = this.configs.hideLabels;
 
-  availableLangs$ = this.service.availableLangs$;
+  availableLangs: string[] = [...this.configs.availableLangs];
 
   @Input() set languages(langs: Lang[]) {
-    this.availableLangs$ = new BehaviorSubject(langs);
+    this.availableLangs = langs;
   }
 
   /**
    * When true, all inputs will be required.
    */
-  @Input() required: boolean | null | undefined = false;
+  @Input() required: boolean | null | undefined = this.configs.required;
 
   @Input() validators: ValidatorFn[] | null | undefined = [];
+
+  private readonly elementRef: ElementRef = inject(ElementRef);
+
+  /**
+   * Since we're using shadow dom, we need to store a reference to it.
+   * Hence, if you need to find an element, don't use document.getElementById, but this.myShadowRoot.getElementById.
+   */
+  private readonly myShadowRoot: ShadowRoot = this.elementRef.nativeElement.shadowRoot;
 
   validateFn(control: AbstractControl): { [key: string]: any } | null {
     const value: unknown = control.value;
@@ -104,10 +111,10 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
       if (
         value == null ||
         value == undefined ||
-        ((typeof value === "string" || Array.isArray(value)) && value.length === 0) || 
+        ((typeof value === "string" || Array.isArray(value)) && value.length === 0) ||
         (typeof value === "object" && Object.keys(value as Record<string, unknown>).length === 0)
       ) {
-        acc["required"] = true ;
+        acc["required"] = true;
       }
     }
 
@@ -124,20 +131,19 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   }
 
   ngOnInit(): void {
-    this.availableLangs$.subscribe({next: (langs: Lang[]) => {
-      langs.forEach((lang: Lang) => {
-        if (!this.forms.get(lang)) this.forms.addControl(lang, new FormControl(null, [
-          this.validateFn.bind(this)
-        ]));
-      });
-    }});
 
-    this.service.configs$.subscribe({next: (c) => this.configs = c});
+    this.availableLangs.forEach((lang: Lang) => {
+      if (!this.forms.get(lang)) this.forms.addControl(lang, new FormControl(null, [
+        this.validateFn.bind(this)
+      ]));
+    });
+
+    // this.service.configs$.subscribe({next: (c) => this.configs = c});
 
     if (typeof this.autofocus === "string" && this.forms.get(this.autofocus)) {
       this.activeLang = this.autofocus;
     } else if (this.autofocus === true) {
-      this.focusInput(this.availableLangs$.value[0]);
+      this.focusInput(this.availableLangs[0]);
     }
   }
 
@@ -187,8 +193,8 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   isActiveLang(lang: Lang): boolean {
     return this.activeLang === lang || (
       this.activeLang === null &&
-      this.availableLangs$.value &&
-      lang === this.availableLangs$.value[0]
+      this.availableLangs &&
+      lang === this.availableLangs[0]
     );
   }
 
@@ -205,13 +211,13 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   private tryLocateAndFocusInput(lang: Lang): void {
     const done = () => this.cd.detectChanges();
 
-    const input = document.getElementById(this.inputId(lang));
+    const input = this.myShadowRoot.getElementById(this.inputId(lang));
     if (input) {
       input.focus();
       return done();
     }
 
-    const container = document.getElementById(this.containerId(lang));
+    const container = this.myShadowRoot.getElementById(this.containerId(lang));
     if (container) {
       const input = container.querySelector('input');
       if (input) {

@@ -35,7 +35,7 @@ export class NgxI18nInputModule {
       providers: [
         {
           provide: NGX_I18N_INPUT_CONFIG,
-          useValue: {...NGX_I18N_INPUT_DEFAULT_CONFIGS, ...configs}
+          useValue: {...configs}
         }
       ]
     }
