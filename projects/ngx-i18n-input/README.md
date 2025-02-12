@@ -1,8 +1,7 @@
 # NgxI18nInput
 
 ## TODOs
-- During initial configuration, `forRoot()` should accept a component name. In that component will be injected some data such as `FormControl` and configs and it will be responsable for rendering it.
-- Optionally hide labels: If user wants to manage itself the labels, the input should hide it.
+- Dynamic language addition: final user can update `availableLangs` variable with a `+` button.
 
 ## Credits
 Got some inspiration from

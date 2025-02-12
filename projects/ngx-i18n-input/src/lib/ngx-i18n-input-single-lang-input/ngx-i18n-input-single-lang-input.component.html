@@ -1,0 +1,32 @@
+<ng-template #defaultInputTemplate let-all>
+  <input id="{{ all.id }}"
+    (blur)="inputTouched()"
+    (focus)="inputTouched()"
+    (input)="inputTouched()"
+    (click)="inputTouched()"
+
+
+    class="default-input-field border-solid outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-blue-500"
+    [ngClass]="{
+      'focus:ring-blue-500': all.control.valid,
+      'border-red-500': all.control.invalid && all.control.touched,
+      '-mt-px rounded-tl-none rounded-tr-none': all.configs.layout === 'tabs' && !all.configs.hideLabels
+    }"
+    
+
+    [placeholder]="all.configs.formatLabel(all.language, all.configs.label)"
+    [formControl]="all.control">
+</ng-template>
+
+<ng-container #dynamicContainer></ng-container>
+
+<ng-container *ngIf="!configs.defaultInputComponent">
+  <ng-container *ngTemplateOutlet="configs.inputTemplate || defaultInputTemplate; context: {
+    $implicit: {
+      id: this.inputId,
+      language: this.lang,
+      control: this.control,
+      configs: this.configs
+    }
+  }" ></ng-container>
+</ng-container>

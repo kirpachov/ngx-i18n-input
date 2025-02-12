@@ -1,16 +1,4 @@
 <!-------------------  TEMPLATES ------------------->
-<ng-template #defaultInputTemplate let-all>
-  <input id="{{ all.id }}"
-    class="default-input-field border-solid outline-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-blue-500"
-    [ngClass]="{
-      'focus:ring-blue-500': all.control.valid,
-      'border-red-500': all.control.invalid && all.control.touched
-    }"
-
-    [placeholder]="all.configs.formatLabel(all.language, all.configs.label)"
-    [formControl]="all.control">
-</ng-template>
-
 <ng-template #defaultlabelTemplate let-all>
   <span [ngClass]="{'underline decoration-wavy decoration-red-500': all.control.touched && all.control.invalid && (layout === 'vertical' || !isActiveLang(all.language))}">
     {{ all.configs.formatLabel(all.language, all.configs.label) }}
@@ -28,72 +16,56 @@
     }"></ng-container>
 </ng-template>
 
-<ng-template #actualInput let-all>
-  <ng-container *ngTemplateOutlet="inputTemplate || defaultInputTemplate; context: {
-    $implicit: {
-      language: all.lang,
-      control: forms.controls[all.lang],
-      id: all.id,
-      configs: all.configs
-    }
-    }"></ng-container>
-</ng-template>
-
-<!-------------------  LAYOUTS ------------------->
-
-<ng-template #layoutVertical>
-  <ng-container *ngFor="let lang of availableLangs">
-    <div class="block mb-4">
-      <div class="flex flex-col">
-        <label *ngIf="!hideLabels" for="input-{{ uid }}-{{ lang }}">
-          <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang, configs } }"></ng-container>
-        </label>
-
-        <div id="{{ containerId(lang) }}">
-          <ng-container
-            *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang, id: inputId(lang), configs } }"></ng-container>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-</ng-template>
-
-<ng-template #layoutTabs>
-
-  <ul *ngIf="!hideLabels"
-    class="m-0 p-0 flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200">
-    <ng-container *ngFor="let lang of availableLangs;">
-      <li class="me-2">
-        <label for="input-{{uid}}-{{lang}}" (click)="focusInput(lang)"
-          class="inline-block px-4 py-3 rounded-t-lg cursor-pointer" [ngClass]="{
-            'text-blue-600 bg-gray-100 active': isActiveLang(lang),
-            'hover:text-gray-600 hover:bg-gray-50': !isActiveLang(lang)
-            }">
-          <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang, configs } }"></ng-container>
-        </label>
-      </li>
-    </ng-container>
-  </ul>
-
-  <ng-container *ngFor="let lang of availableLangs;">
-    <div id="{{ containerId(lang) }}" [ngClass]="{
-      'hidden': !isActiveLang(lang)
-    }">
-      <ng-container
-        *ngTemplateOutlet="actualInput; context: { $implicit: { lang: lang, id: inputId(lang), configs } }"></ng-container>
-    </div>
-  </ng-container>
-</ng-template>
-
 <!-------------------  CONTENT ------------------->
 <form class="layout-{{ layout }}" [ngClass]="{'labels-hidden': hideLabels}" [formGroup]="forms">
   <ng-container [ngSwitch]="layout">
     <ng-container *ngSwitchCase="'tabs'">
-      <ng-container *ngTemplateOutlet="layoutTabs"></ng-container>
+      <ul *ngIf="!hideLabels"
+      class="m-0 p-0 flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200">
+      <ng-container *ngFor="let lang of availableLangs;">
+        <li class="me-2">
+          <label for="input-{{uid}}-{{lang}}" (click)="focusInput(lang)"
+            class="inline-block px-4 py-3 rounded-t-lg cursor-pointer" [ngClass]="{
+              'text-blue-600 bg-gray-100 active': isActiveLang(lang),
+              'hover:text-gray-600 hover:bg-gray-50': !isActiveLang(lang)
+              }">
+            <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang, configs } }"></ng-container>
+          </label>
+        </li>
+      </ng-container>
+    </ul>
+  
+    <ng-container *ngFor="let lang of availableLangs;">
+      <div id="{{ containerId(lang) }}" [ngClass]="{
+        'hidden': !isActiveLang(lang)
+      }">
+        <lib-ngx-i18n-input-single-lang-input
+          [configs]="configs"
+          [formControlName]="lang"
+          [lang]="lang"
+        ></lib-ngx-i18n-input-single-lang-input>
+      </div>
+    </ng-container>
     </ng-container>
 
     <ng-container *ngSwitchDefault>
-      <ng-container *ngTemplateOutlet="layoutVertical"></ng-container>
+      <ng-container *ngFor="let lang of availableLangs">
+        <div class="block mb-4">
+          <div class="flex flex-col">
+            <label *ngIf="!hideLabels" for="input-{{ uid }}-{{ lang }}">
+              <ng-container *ngTemplateOutlet="actualLabel; context: { $implicit: { lang: lang, configs } }"></ng-container>
+            </label>
+    
+            <div id="{{ containerId(lang) }}">
+              <lib-ngx-i18n-input-single-lang-input
+                [configs]="configs"
+                [formControlName]="lang"
+                [lang]="lang"
+              ></lib-ngx-i18n-input-single-lang-input>
+            </div>
+          </div>
+        </div>
+      </ng-container>
     </ng-container>
   </ng-container>
 </form>

@@ -1,6 +1,6 @@
-import { InjectionToken, Provider, TemplateRef } from "@angular/core";
+import { InjectionToken, Provider, TemplateRef, Type } from "@angular/core";
 import { LANGUAGE_DETAILS } from "./country-iso-code";
-import { ValidatorFn } from "@angular/forms";
+import { AbstractControl, FormControl, ValidatorFn } from "@angular/forms";
 
 export type Lang = string;
 export type Langs = Lang[];
@@ -22,6 +22,8 @@ export interface NgxI18nInputConfig {
   required: boolean,
   label: string | Record<Lang, string> | null,
   validators: ValidatorFn[],
+  defaultInputComponent: Type<any> | null | undefined,
+  formatOutput: (formValue: Record<Lang, any | null>) => Record<Lang, any | null>
 }
 
 export const NGX_I18N_INPUT_DEFAULT_CONFIGS: NgxI18nInputConfig = {
@@ -45,6 +47,8 @@ export const NGX_I18N_INPUT_DEFAULT_CONFIGS: NgxI18nInputConfig = {
   required: false,
   label: null,
   validators: [],
+  defaultInputComponent: null,
+  formatOutput: ngxI18nDefaultFormatOutput
 };
 
 // TODO partial ??
@@ -72,4 +76,16 @@ export function ngxI18nDefaultFormatOutput<T>(formValue: Record<Lang, T | null>)
 
 export function generateUid(): string {
   return Math.random().toString(36).substring(2);
+}
+
+export interface NgxI18nInputContext {
+  configs: NgxI18nInputConfig;
+  control: FormControl<any>,
+  // writeValue: (value: any) => void
+}
+
+export const NGX_I18N_INPUT_CONTEXT = new InjectionToken<NgxI18nInputContext>('NGX_I18N_INPUT_CONTEXT');
+
+export function isNgxI18nInputContext(v: unknown): v is NgxI18nInputContext {
+  return typeof v === "object" && v !== null && "configs" in v && "control" in v;
 }
