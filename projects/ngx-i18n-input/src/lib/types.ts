@@ -80,7 +80,8 @@ export function generateUid(): string {
 
 export interface NgxI18nInputContext {
   configs: NgxI18nInputConfig;
-  control: FormControl<any>,
+  control: FormControl<any>;
+  lang: Lang;
   // writeValue: (value: any) => void
 }
 

@@ -25,7 +25,7 @@ export class NgxI18nInputSingleLangInputComponent<T> implements AfterViewInit, C
   private readonly injector: Injector = inject(Injector);
 
   /*************************************** Instance variables ***************************************/
-  @ViewChild('dynamicContainer', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
+  @ViewChild('dynamicContainer', { read: ViewContainerRef, static: true }) container?: ViewContainerRef;
 
   readonly control = new FormControl<T | null>(null);
 
@@ -62,13 +62,25 @@ export class NgxI18nInputSingleLangInputComponent<T> implements AfterViewInit, C
   /*************************************** Public methods ***************************************/
 
   renderComponent(): void {
-    if (!this.configs.defaultInputComponent) return;
+    if (!this.configs.defaultInputComponent) return; // No component to render.
+    if (this.configs.inputTemplate) return; // will render inputTemplate.
+
+    if (!this.container) {
+      console.error(`Container not found for ${this.configs.defaultInputComponent.name}`);
+      return;
+    }
+
+    if (!this.lang) {
+      console.error(`invalid lang`);
+      return;
+    }
 
     this.container.clear();
 
     const context: NgxI18nInputContext = {
       configs: this.configs,
       control: this.control,
+      lang: this.lang
     };
 
     const injector = Injector.create({

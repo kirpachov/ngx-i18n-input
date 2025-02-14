@@ -20,7 +20,7 @@
 
 <ng-container #dynamicContainer></ng-container>
 
-<ng-container *ngIf="!configs.defaultInputComponent">
+<ng-container *ngIf="configs.inputTemplate || !configs.defaultInputComponent">
   <ng-container *ngTemplateOutlet="configs.inputTemplate || defaultInputTemplate; context: {
     $implicit: {
       id: this.inputId,
