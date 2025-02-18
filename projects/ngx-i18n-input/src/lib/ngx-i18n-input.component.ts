@@ -164,7 +164,9 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
 
   /*************************************** Outputs ***************************************/
 
-  @Output() valueChanges: Observable<Record<Lang, T | null>> = this.forms.valueChanges.pipe(map(this.configs.formatOutput));
+  @Output() readonly valueChanges: Observable<Record<Lang, T | null>> = this.forms.valueChanges.pipe(map(this.configs.formatOutput));
+
+  @Output() readonly activeLangChange: BehaviorSubject<Lang | null> = new BehaviorSubject<Lang | null>(null);
 
   /*************************************** ANGULAR LIFECYCLE HOOKS ***************************************/
 
@@ -178,7 +180,7 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
     // this.service.configs$.subscribe({next: (c) => this.configs = c});
 
     if (typeof this.autofocus === "string" && this.forms.get(this.autofocus)) {
-      this.activeLang = this.autofocus;
+      this.focusInput(this.autofocus);
     } else if (this.autofocus === true) {
       this.focusInput(this.availableLangs[0]);
     }
@@ -279,6 +281,7 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
 
   focusInput(lang: string): void {
     this.activeLang = lang;
+    this.activeLangChange.next(lang as Lang);
     setTimeout(() => this.tryLocateAndFocusInput(lang));
     this.detectChanges();
   }
@@ -303,9 +306,15 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
 
     const container = document.getElementById(this.containerId(lang));
     if (container) {
-      const input = container.querySelector('input');
+      const input: HTMLInputElement | null = container.querySelector('input');
       if (input) {
         input.focus();
+        return done();
+      }
+
+      const textarea: HTMLTextAreaElement | null = container.querySelector('textarea');
+      if (textarea) {
+        textarea.focus();
         return done();
       }
     }
