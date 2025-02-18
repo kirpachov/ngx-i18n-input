@@ -79,9 +79,23 @@ export function generateUid(): string {
 }
 
 export interface NgxI18nInputContext {
+  /**
+   * Unique identifier for the input.
+   * In particolar, you can use this value for the id of the input element.
+   * @example
+   * ```html
+   * <ng-template #inputTemp let-context>
+   *   <input [id]="context.id">
+   * </ng-template>
+   * 
+   * <ngx-i18n-input [inputTemplate]="inputTemp"></ngx-i18n-input>
+   * ```
+   */
+  id: string;
   configs: NgxI18nInputConfig;
   control: FormControl<any>;
   lang: Lang;
+  emitCustomEvent: (name: string, value: any) => void;
   // writeValue: (value: any) => void
 }
 

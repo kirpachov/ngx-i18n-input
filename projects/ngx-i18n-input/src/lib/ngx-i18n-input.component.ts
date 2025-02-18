@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, Type, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, forwardRef, Inject, inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, TemplateRef, Type, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR, RequiredValidator, ValidatorFn } from '@angular/forms';
 import { Lang, mergeNgxI18nConfigs, NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConfig, NgxI18nInputLayout, NgxI18nInputLayouts } from './types';
 import { generateUid, ngxI18nDefaultFormatOutput } from './types';
@@ -167,6 +167,8 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   @Output() readonly valueChanges: Observable<Record<Lang, T | null>> = this.forms.valueChanges.pipe(map(this.configs.formatOutput));
 
   @Output() readonly activeLangChange: BehaviorSubject<Lang | null> = new BehaviorSubject<Lang | null>(null);
+
+  @Output() readonly onCustomEvent = new EventEmitter<{ lang: Lang, name: string, value: any }>();
 
   /*************************************** ANGULAR LIFECYCLE HOOKS ***************************************/
 

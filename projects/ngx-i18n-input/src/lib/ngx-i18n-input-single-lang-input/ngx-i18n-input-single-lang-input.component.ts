@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, Injector, Input, OnInit, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, forwardRef, inject, Injector, Input, OnInit, Output, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { generateUid, Lang, NGX_I18N_INPUT_CONFIG, NGX_I18N_INPUT_CONTEXT, NGX_I18N_INPUT_DEFAULT_CONFIGS, NgxI18nInputConfig, NgxI18nInputContext } from '../types';
 
@@ -24,10 +24,14 @@ export class NgxI18nInputSingleLangInputComponent<T> implements AfterViewInit, C
   private readonly cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private readonly injector: Injector = inject(Injector);
 
+  @Output() readonly onCustomEvent = new EventEmitter<{ lang: Lang, name: string, value: any }>();
+
   /*************************************** Instance variables ***************************************/
   @ViewChild('dynamicContainer', { read: ViewContainerRef, static: true }) container?: ViewContainerRef;
 
   readonly control = new FormControl<T | null>(null);
+
+  injectableContext: NgxI18nInputContext | null = null;
 
   /*************************************** Inputs and configs ***************************************/
 
@@ -59,6 +63,22 @@ export class NgxI18nInputSingleLangInputComponent<T> implements AfterViewInit, C
     this.control[isDisabled ? 'disable' : 'enable']();
   }
 
+  ngOnChanges(): void {
+    if (this.lang && this.inputId) {
+      this.injectableContext = {
+        id: this.inputId,
+        configs: this.configs,
+        control: this.control,
+        lang: this.lang,
+        emitCustomEvent: (name: string, value: any) => {
+          this.onCustomEvent.emit({ lang: this.lang!, name, value });
+        }
+      }
+    } else {
+      this.injectableContext = null;
+    }
+  }
+
   /*************************************** Public methods ***************************************/
 
   renderComponent(): void {
@@ -75,19 +95,27 @@ export class NgxI18nInputSingleLangInputComponent<T> implements AfterViewInit, C
       return;
     }
 
+    if (!this.injectableContext) {
+      console.error(`invalid context`, this.injectableContext);
+      return;
+    }
+
     this.container.clear();
 
-    const context: NgxI18nInputContext = {
-      configs: this.configs,
-      control: this.control,
-      lang: this.lang
-    };
+    // const context: NgxI18nInputContext = {
+    //   configs: this.configs,
+    //   control: this.control,
+    //   lang: this.lang,
+    //   emitCustomEvent: (name: string, value: any) => {
+    //     this.onCustomEvent.emit({ lang: this.lang!, name, value });
+    //   }
+    // };
 
     const injector = Injector.create({
       providers: [
         {
           provide: NGX_I18N_INPUT_CONTEXT,
-          useValue: context
+          useValue: this.injectableContext
         }
       ],
       parent: this.injector

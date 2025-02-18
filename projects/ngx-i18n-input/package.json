@@ -1,6 +1,21 @@
 {
   "name": "ngx-i18n-input",
   "version": "0.0.1",
+  "description": "Angular library for internationalized input fields",
+  "author": "@kirpachov",
+  "license": "ISC",
+  "homepage": "https://github.com/kirpachov/ngx-i18n-input",
+  "keywords": [
+    "angular",
+    "input",
+    "i18n",
+    "internationalization",
+    "internationalized",
+    "localized",
+    "ngx",
+    "ngx-i18n-input",
+    "ngx-input"
+  ],
   "peerDependencies": {
     "@angular/common": "^15.2.0",
     "@angular/core": "^15.2.0"
