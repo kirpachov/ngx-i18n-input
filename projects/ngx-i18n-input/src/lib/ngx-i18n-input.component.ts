@@ -49,8 +49,8 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    *  <ngx-i18n-input [inputTemplate]="titleTemplate" formControlName="title">
    * ```
    */
-  @Input() set inputTemplate(template: TemplateRef<unknown> | null) {
-    this.configs.inputTemplate = template;
+  @Input() set inputTemplate(template: TemplateRef<unknown> | null | undefined) {
+    this.configs.inputTemplate = template || null;
   }
 
   get inputTemplate() {
@@ -59,10 +59,17 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
 
   /**
    * Customize language name template.
-   * Example with both input and label templates:
+   * Usage:
+   * ```html
+   *  <ng-template #labelTemplate let-context>
+   *    <span>{{ context.configs.formatLabel(context.lang, context.configs.label) }}</span>
+   *  </ng-template>
+   *
+   *  <ngx-i18n-input [labelTemplate]="labelTemplate"></ngx-i18n-input>
+   * ```
    */
-  @Input() set labelTemplate(template: TemplateRef<unknown> | null) {
-    this.configs.labelTemplate = template;
+  @Input() set labelTemplate(template: TemplateRef<unknown> | null | undefined) {
+    this.configs.labelTemplate = template ?? null;
   }
 
   get labelTemplate() {
@@ -73,8 +80,8 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    * Customize label of the component.
    * When provided, will be used as string inside the template.
    */
-  @Input() set label(label: string | Record<Lang, string> | null) {
-    this.configs.label = label;
+  @Input() set label(label: string | Record<Lang, string> | null | undefined) {
+    this.configs.label = label || null;
   }
 
   get label() {
@@ -88,8 +95,8 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    * - vertical
    * Default: vertical
    */
-  @Input() set layout(layout: NgxI18nInputLayout) {
-    this.configs.layout = layout;
+  @Input() set layout(layout: NgxI18nInputLayout | null | undefined) {
+    if (layout) this.configs.layout = layout;
   }
 
   get layout() {
@@ -101,7 +108,9 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
    * When boolean, will autofocus the first input.
    * When string, will autofocus the input with the given lang.
    */
-  @Input() set autofocus(autofocus: boolean | string) {
+  @Input() set autofocus(autofocus: boolean | string | null | undefined) {
+    if (autofocus === null || autofocus === undefined) autofocus = false;
+
     this.configs.autofocus = autofocus;
   }
 
@@ -112,7 +121,9 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   /**
    * When true, labels won't be displayed.
    */
-  @Input() set hideLabels(hideLabels: boolean) {
+  @Input() set hideLabels(hideLabels: boolean | null | undefined) {
+    if (hideLabels === null || hideLabels === undefined) hideLabels = false;
+
     this.configs.hideLabels = hideLabels;
   }
 
@@ -124,7 +135,9 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
     return this.configs.availableLangs;
   }
 
-  @Input() set languages(langs: Lang[]) {
+  @Input() set languages(langs: Lang[] | null | undefined) {
+    if (langs === null || langs === undefined) langs = [];
+
     this.configs.availableLangs = langs;
   }
 
@@ -189,14 +202,12 @@ export class NgxI18nInputComponent<T> implements OnInit, OnChanges, ControlValue
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.inputs) {
-      this.inputs.forEach((input: NgxI18nInputSingleLangInputComponent<T>) => {
-        input.detectChanges();
-      });
-    }
+    this.inputs?.forEach((input: NgxI18nInputSingleLangInputComponent<T>) => {
+      input.detectChanges();
+    });
 
     setTimeout(() => {
-      Object.values(this.forms.controls).forEach((control: AbstractControl) => control.updateValueAndValidity());
+      Object.values(this.forms.controls).forEach((control: AbstractControl) => control.updateValueAndValidity({ emitEvent: false }));
     });
   }
 

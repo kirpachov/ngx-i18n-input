@@ -1,14 +1,14 @@
 <!-------------------  TEMPLATES ------------------->
 <ng-template #defaultlabelTemplate let-all>
-  <span [ngClass]="{'underline decoration-wavy decoration-red-500': all.control.touched && all.control.invalid && (layout === 'vertical' || !isActiveLang(all.language))}">
-    {{ all.configs.formatLabel(all.language, all.configs.label) }}
+  <span [ngClass]="{'underline decoration-wavy decoration-red-500': all.control.touched && all.control.invalid && (layout === 'vertical' || !isActiveLang(all.lang))}">
+    {{ all.configs.formatLabel(all.lang, all.configs.label) }}
   </span>
 </ng-template>
 
 <ng-template #actualLabel let-all>
   <ng-container *ngTemplateOutlet="labelTemplate || defaultlabelTemplate; context: {
     $implicit: {
-      language: all.lang,
+      lang: all.lang,
       control: forms.controls[all.lang],
       id: all.id,
       configs: all.configs
