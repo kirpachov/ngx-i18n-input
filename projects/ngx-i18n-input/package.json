@@ -1,6 +1,6 @@
 {
   "name": "ngx-i18n-input",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Angular library for internationalized input fields",
   "author": "@kirpachov",
   "license": "ISC",
