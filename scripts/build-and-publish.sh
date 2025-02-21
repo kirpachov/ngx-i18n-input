@@ -13,8 +13,13 @@ fi
 
 echo "Building and publishing..."
 
-
 cd projects/ngx-i18n-input/ && \
   ng build -c production && \
   cd dist && \
   npm publish
+
+
+echo "Don't forget to create a tag with the new version."
+echo "Run the following commands:"
+echo "git tag -a v$version -m \"<message>\""
+echo "git push origin v$version"
